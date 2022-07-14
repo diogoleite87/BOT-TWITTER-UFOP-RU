@@ -14,6 +14,10 @@ current_date = date.today()
 current_day = current_date.strftime('%d')
 current_date_gmt = current_date.strftime('%d/%m/%Y')
 
+postAlmocoOPMA = False
+postJantaOPMA = False
+postAlmocoJM = False
+postJantaJM = False
 
 def subtraiDataCardapio(url):
 
@@ -122,21 +126,25 @@ def preTweet(almocoOPMA, jantaOPMA, almocoJM, jantaJM):
 
     if len(almocoOPMA) > 100:
         tweetar(api, almocoOPMA)
+        postAlmocoOPMA = True
     else:
         print('Erro no cardapio Ouro Preto e Mariana - Almoço')
 
     if len(jantaOPMA) > 100:
         tweetar(api, jantaOPMA)
+        postJantaOPMA = True
     else:
         print('Erro no cardapio Ouro Preto e Mariana - Jantar')
 
     if len(almocoJM) > 100:
         tweetar(api, almocoJM)
+        postAlmocoJM = True
     else:
         print('Erro no cardapio João Monlevade - Almoço')
 
     if len(jantaJM) > 100:
         tweetar(api, jantaJM)
+        postJantaJM = True
     else:
         print('Erro no cardapio João Monlevade - Jantar')
 
@@ -149,6 +157,8 @@ def main():
 
     if verificaCardapioAtualizado(int(dataCardapio), int(current_day)):
 
+        horaAtual = datetime.today().strftime('%H')
+
         print("Cardapio atualizado, elaborando postagem...")
         cardapioFormatado = subtraiCardapio(url)
 
@@ -156,6 +166,15 @@ def main():
             cardapioFormatado)
 
         preTweet(almocoOPMA, jantaOPMA, almocoJM, jantaJM)
+
+        if ((postAlmocoOPMA == True) and (postJantaOPMA == True) and (postAlmocoJM == True) and (postJantaJM == True)):
+            print("Cardapio atualizado com sucesso!")
+        elif int(horaAtual) > 17:
+            print("Horario de postagem expirou!")
+        else:
+            time.sleep(1800)
+            main()
+
     else:
 
         horaAtual = datetime.today().strftime('%H')
@@ -163,7 +182,8 @@ def main():
         if int(horaAtual) > 17:
             print('Cardapio nao atualizado antes das 18:00hrs, postagem CANCELADA.')
         else:
-            print("Cardapio ainda nao foi atualizado, sera feita uma nova busca em 30 minutos...")
+            print(
+                "Cardapio ainda nao foi atualizado, sera feita uma nova busca em 30 minutos...")
             time.sleep(1800)
             main()
 
