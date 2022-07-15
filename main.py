@@ -1,14 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
 import tweepy
+import dotenv
+import os
 import re
 from datetime import date, datetime
 import time
-
-consumer_key = ''
-consumer_secret = ''
-access_token = ''
-access_token_secret = ''
 
 current_date = date.today()
 current_day = current_date.strftime('%d')
@@ -111,39 +108,55 @@ def montaCardapiosFinal(cardapioFormatado) -> str:
     return almocoOPMA, jantaOPMA, almocoJM, jantaJM
 
 
-def tweetar(api, tweet):
-    try:
-        api.update_status(tweet)
-    except:
-        print('Erro ao Tweetar')
+def verificaPost(post):
+    if post :
+        return True
+    else:
+        return False
+
+
+def tweetar(api, tweet, post):
+
+    if verificaPost(post) :
+        print("Cardapio em questão ja atualizado!")
+    else :
+        try:
+            api.update_status(tweet)
+        except:
+            print('Erro ao Tweetar')
 
 
 def preTweet(almocoOPMA, jantaOPMA, almocoJM, jantaJM):
+
+    global postAlmocoOPMA, postJantaOPMA, postAlmocoJM, postJantaJM
+
+    dotenv.load_dotenv(dotenv.find_dotenv())
+
     auth = tweepy.OAuth1UserHandler(
-        consumer_key, consumer_secret, access_token, access_token_secret)
+        os.getenv("CONSUMER_KEY"), os.getenv("CONSUMER_SECRET"), os.getenv("ACCESS_TOKEN"), os.getenv("ACCESS_TOKEN_SECRET"))
 
     api = tweepy.API(auth)
 
     if len(almocoOPMA) > 100:
-        tweetar(api, almocoOPMA)
+        tweetar(api, almocoOPMA, postAlmocoOPMA)
         postAlmocoOPMA = True
     else:
         print('Erro no cardapio Ouro Preto e Mariana - Almoço')
 
     if len(jantaOPMA) > 100:
-        tweetar(api, jantaOPMA)
+        tweetar(api, jantaOPMA, postJantaOPMA)
         postJantaOPMA = True
     else:
         print('Erro no cardapio Ouro Preto e Mariana - Jantar')
 
     if len(almocoJM) > 100:
-        tweetar(api, almocoJM)
+        tweetar(api, almocoJM, postAlmocoJM)
         postAlmocoJM = True
     else:
         print('Erro no cardapio João Monlevade - Almoço')
 
     if len(jantaJM) > 100:
-        tweetar(api, jantaJM)
+        tweetar(api, jantaJM, postJantaJM)
         postJantaJM = True
     else:
         print('Erro no cardapio João Monlevade - Jantar')
@@ -172,6 +185,7 @@ def main():
         elif int(horaAtual) > 17:
             print("Horario de postagem expirou!")
         else:
+            print("Nova verificação em 30 minutos...")
             time.sleep(1800)
             main()
 

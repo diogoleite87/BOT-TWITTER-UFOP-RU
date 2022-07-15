@@ -1,0 +1,5 @@
+requests
+tweepy
+datetime
+bs4
+dotenv
