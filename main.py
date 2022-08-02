@@ -28,6 +28,7 @@ def subtraiDataCardapio(url):
     dataCardapio = soup.find('strong')
 
     dataCardapioFormatado = dataCardapio.get_text().strip()
+    dataCardapioFormatado = re.sub('[^0-9]', '', dataCardapioFormatado)
 
     return dataCardapioFormatado
 
